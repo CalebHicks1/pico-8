@@ -1,7 +1,6 @@
 pico-8 cartridge // http://www.pico-8.com
 version 43
 __lua__
--- TODO: variable hitbox for wizard
 
 -- init
 function _init()
@@ -240,13 +239,23 @@ function draw_player(p)
 		if abs(p.dx) > 0.1 then
 			-- draw head and feet
 			-- with animation
-			spr(1+p.frame,p.x,p.y,1,1,p.facing)
-			spr(17+p.frame,p.x,p.y+8,1,1,p.facing)
+			if p.player then
+				spr(1+p.frame,p.x,p.y,1,1,p.facing)
+				spr(17+p.frame,p.x,p.y+8,1,1,p.facing)
+			else
+				spr_recolor(1+p.frame, p.x,p.y,p.facing,12,8)
+				spr_recolor(17+p.frame, p.x,p.y+8,p.facing,12,8)
+			end
 		else
 			-- draw head and feet
 			-- without animation
-			spr(1, p.x,p.y,1,1,p.facing)
-			spr(17, p.x,p.y+8,1,1,p.facing)
+			if p.player then
+				spr(1, p.x,p.y,1,1,p.facing)
+				spr(17, p.x,p.y+8,1,1,p.facing)
+			else
+				spr_recolor(1, p.x,p.y,p.facing,12,8)
+				spr_recolor(17, p.x,p.y+8,p.facing,12,8)
+			end
 		end -- end if
 	else
 		-- dead
@@ -275,6 +284,20 @@ function draw_particle(p)
 end
 -->8
 -- util
+
+function spr_recolor(n,x,y,flip_x,col,new_col)
+	-- calls the spr() function, replacing a given color with a new one
+	spr(n,x,y,1,1,flip_x)
+	for i=0,8 do
+		for j=0,8 do
+			c = pget(x+i,y+j)
+			if c == col then
+				pset(x+i,y+j,new_col)
+			end
+		end
+	end
+end
+
 function check_col(x,y,dx,dy)
 	-- check if the given coords
 	-- will intersect with the map
