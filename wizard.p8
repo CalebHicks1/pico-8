@@ -1,6 +1,9 @@
 pico-8 cartridge // http://www.pico-8.com
 version 43
 __lua__
+-- TODO: variable hitbox for wizard
+-- TODO: particle spawning system
+
 -- init
 function _init()
 	player = wizard(50,20,true)
@@ -23,7 +26,8 @@ function wizard(_x,_y,_player)
   		cooldown=0,
   		player=_player,
   		facing=true, -- true = left
-  		dead=false
+  		dead=false,
+		just_died=false
 	}
 	return a
 end
@@ -76,7 +80,22 @@ function _update()
 	end -- end if
 end
 
+function wizard_death(w)
+	-- run this once when the wizard dies
+	w.dead = true
+	w.y = w.y - 8
+	w.dy -= 1
+	-- update hitbox
+	w.h = 8
+	
+	add(particles,particle(w.x,w.y+w.h))
+end
+
 function update_wizard(p)
+	if p.just_died and not p.dead then
+		-- run this once when the wizard dies
+		wizard_death(p)
+	end -- end if
 	-- countdown to prevent spamming spell
 	if (p.cooldown > 0) p.cooldown-=1
 	accel = 0.3
@@ -144,7 +163,7 @@ function update_spell(spell)
 			hit = check_rec_col(spell.x,spell.y,4,wiz.x,wiz.y,8)
 			
 			if (hit) then
-				wiz.dead = true
+				wiz.just_died = true
 				wiz.dx = spell.dx*0.1
 				del(spells,spell)
 			end -- end if
