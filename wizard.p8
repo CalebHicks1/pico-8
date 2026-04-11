@@ -60,26 +60,27 @@ function particle(kind,_x,_y)
 			dy=-0.8+rnd(1),
 			col=9+rnd(2), --random orange or yellow
 			ttl=60+rnd(25),
-			grav=0.04
+			grav=0.04,
+			col2=5+rnd(2),
+			col2_timer=30,
+			friction=1
 		}
 	elseif kind=="fire" then
 		k = {
-			dx=-0.4+rnd(0.8),
+			dx=-1+rnd(2),
 			dy=-0.2+rnd(1),
 			col=9+rnd(2), --random orange or yellow
-			ttl=10+rnd(25),
-			grav=-0.05
+			ttl=20+rnd(25),
+			grav=-0.05,
+			col2=5+rnd(2),
+			col2_timer=15,
+			friction=0.8
 		}
 	end
-	p = {
-		x=_x,
-		y=_y,
-		dx=k.dx,
-		dy=k.dy,
-		col=k.col,
-		ttl=k.ttl,
-		grav=k.grav 
-	}
+	-- use k as preset
+	p = k
+	p.x=_x
+	p.y=_y
 	return p
 end
 -->8
@@ -115,7 +116,7 @@ function update_wizard(p)
 	if p.just_died and not p.dead then
 		-- run this once when the wizard dies
 		p.dead = true
-		p.burning=25	
+		p.burning=35	
 		p.dying=15
 	end -- end if
 	if clock_finished(p, "dying") then
@@ -205,8 +206,12 @@ function update_particle(p)
 	end
 	p.y+=p.dy
 	p.x+=p.dx
+	p.dx*=p.friction
 	p.ttl-=1
 	if (p.ttl<=0) del(particles,p)
+	if clock_finished(p,"col2_timer") then
+		p.col=p.col2
+	end
 end
 -->8
 -- draw
@@ -342,6 +347,7 @@ function clock_finished(obj, clock)
 		obj[clock] -= 1
 		return false
 	end
+	obj[clock]=nil
 	return true
 end
 __gfx__
