@@ -74,7 +74,7 @@ function particle(kind,_x,_y)
 			grav=-0.05,
 			col2=5+rnd(2),
 			col2_timer=15,
-			friction=0.8
+			friction=0.9-rnd(0.9)
 		}
 	end
 	-- use k as preset
@@ -123,7 +123,7 @@ function update_wizard(p)
 		wizard_death(p)
 	end
 	if check_status(p, "burning") then
-		spawn_particles(5, "fire", p.x+p.w/2,p.y+p.h-2)
+		spawn_particles(p.burning, "fire", p.x+p.w/2,p.y+p.h-2)
 	end
 	-- countdown to prevent spamming spell
 	if (p.cooldown > 0) p.cooldown-=1
