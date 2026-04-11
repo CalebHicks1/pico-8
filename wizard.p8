@@ -20,10 +20,10 @@ function wizard(_x,_y,_player)
 		dx=0,
 		dy=0,
 		frame=1,
-  cooldown=0,
-  player=_player,
-  facing=true, -- true = left
-  dead=false
+  		cooldown=0,
+  		player=_player,
+  		facing=true, -- true = left
+  		dead=false
 	}
 	return a
 end
