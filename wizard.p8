@@ -59,16 +59,16 @@ function particle(kind,_x,_y)
 			dx=-0.2+rnd(0.4),
 			dy=-0.8+rnd(1),
 			col=9+rnd(2), --random orange or yellow
-			ttl=60+rnd(25),
+			ttl=100+rnd(25),
 			grav=0.04,
 			col2=5+rnd(2),
-			col2_timer=30,
-			friction=1
+			col2_timer=20+rnd(20),
+			friction=0.95
 		}
 	elseif kind=="fire" then
 		k = {
 			dx=-1+rnd(2),
-			dy=-0.2+rnd(1),
+			dy=-1+rnd(1.5),
 			col=9+rnd(2), --random orange or yellow
 			ttl=20+rnd(25),
 			grav=-0.05,
@@ -123,7 +123,7 @@ function update_wizard(p)
 		wizard_death(p)
 	end
 	if check_status(p, "burning") then
-		spawn_particles(5, "fire", p.x+p.w/2,p.y+p.h-5)
+		spawn_particles(5, "fire", p.x+p.w/2,p.y+p.h-2)
 	end
 	-- countdown to prevent spamming spell
 	if (p.cooldown > 0) p.cooldown-=1
@@ -148,8 +148,10 @@ function update_wizard(p)
 	 
 	--if (btn(3)) p.dy += accel
 
-	floor_overlap = check_col(p.x,p.y+p.h,p.dx,p.dy)
-	if floor_overlap > -1 then
+	floor_overlap_left = check_col(p.x,p.y+p.h,p.dx,p.dy)
+	floor_overlap_right = check_col(p.x+8,p.y+p.h,p.dx,p.dy)
+	floor_overlap = floor_overlap_left or floor_overlap_right
+	if floor_overlap then
 		p.dy = 0
 		
 	else
@@ -201,8 +203,8 @@ end
 function update_particle(p)
 	p.dy += p.grav
 	floor_overlap = check_col(p.x,p.y,p.dx,p.dy)
-	if floor_overlap > -1 then
-		p.dy*=-0.5
+	if floor_overlap then
+		p.dy*=-0.3
 	end
 	p.y+=p.dy
 	p.x+=p.dx
@@ -309,11 +311,11 @@ function check_col(x,y,dx,dy)
 	-- with the given velocity
 	-- get map cell coords
 	y1 = (y+dy)/8
-	x1 = x/8
+	x1 = flr(x/8)
 	wall = mget(x1,y1)
 	print(wall,10,10)
-	if (wall != 0) return dy-((y+dy) % 8)
-	return -1 
+	if (wall != 0) return true 
+	return false 
 end
 
 function check_rec_col(x1,y1,w1,x2,y2,w2)
