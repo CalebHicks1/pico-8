@@ -71,10 +71,21 @@ function particle(kind,_x,_y)
 			dy=-1+rnd(1.5),
 			col=9+rnd(2), --random orange or yellow
 			ttl=20+rnd(25),
-			grav=-0.05,
+			grav=-0.3,
 			col2=5+rnd(2),
 			col2_timer=15,
 			friction=0.9-rnd(0.9)
+	}
+	elseif kind=="teleport" then
+		k = {
+			dx=-4+rnd(8),
+			dy=-4+rnd(8),
+			col=14, --random orange or yellow
+			ttl=20+rnd(25),
+			grav=0,
+			col2=5+rnd(2),
+			col2_timer=nil,
+			friction=0.95
 		}
 	end
 	-- use k as preset
@@ -99,6 +110,7 @@ function _update()
 	if btnp(5) then
 		new_wiz = wizard(100,40,false)
 		add(wizards,new_wiz)
+		spawn_particles(100,"teleport",100,40)
 	end -- end if
 end
 
@@ -209,6 +221,7 @@ function update_particle(p)
 	p.y+=p.dy
 	p.x+=p.dx
 	p.dx*=p.friction
+	p.dy*=p.friction
 	p.ttl-=1
 	if (p.ttl<=0) del(particles,p)
 	if clock_finished(p,"col2_timer") then
