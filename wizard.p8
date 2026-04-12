@@ -130,7 +130,9 @@ function wizard_death(w)
 	w.h = 4
 	w.dying=nil -- delete the clock so this doesn't run again
 	w.k=23
-	score+=1
+	if not w.player then
+		score+=1
+	end
 end
 
 function cast_fireball(w)
@@ -302,10 +304,10 @@ function _draw()
 	camera()
 	-- debug prints can go here
 	fillp()
-	spr(6,55,11)
-	spr(22,55,19)
-	print(score, 65, 11, 1)
-	print(score, 64, 10, 12)
+	spr(6,55,0)
+	spr(22,55,8)
+	print(score, 65, 9, 1)
+	print(score, 64, 8, 12)
 end
 
 function draw_player(p)
