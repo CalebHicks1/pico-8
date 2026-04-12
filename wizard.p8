@@ -2,6 +2,13 @@ pico-8 cartridge // http://www.pico-8.com
 version 43
 __lua__
 
+-- TODO enemy wizard shooting
+-- TODO fix jumping
+-- TODO random wizard spawning
+-- TODO timed wizard spawning
+-- TODO point counter
+-- TODO start/retry screens
+
 -- init
 function _init()
 	player = wizard(50,20,true)
@@ -48,8 +55,7 @@ end
 function spawn_particles(count,kind,x,y)
 	for i=1,count do
 		p = particle(kind,x,y)
-		add(particles,p)
-	end -- end for
+		add(particles,p) end -- end for
 end
 
 function particle(kind,_x,_y)
@@ -188,30 +194,48 @@ function update_wizard(p)
 	if (p.dx > 0) p.facing = false
 	if (p.dx < 0) p.facing = true
 	
+	-- wrap around screen
+	if p.x+p.w < 0 then
+		p.x=127
+	end
+	if p.x > 128 then
+		p.x=0-p.w
+	end
+	
 end
 
 function update_spell(spell)
-		sfx(1)
-		a = 0.6
-		spell.dx += a*spell.dir
-		spell.x+=spell.dx
-		spell.frame += abs(spell.dx)/3
-		spell.frame = spell.frame % 2
-		if spell.x >130 or spell.x <-10 then
+	sfx(1)
+	a = 0.6
+	max_speed = 6
+	spell.dx += a*spell.dir
+	spell.dx = mid(-max_speed, spell.dx, max_speed)
+	spell.x+=spell.dx
+	spell.frame += abs(spell.dx)/3
+	spell.frame = spell.frame % 2
+	--if spell.x >130 or spell.x <-10 then
+	--	del(spells,spell)
+	--end -- end if
+	-- particles
+	spawn_particles(2,"fire_trail",spell.x,spell.y+4)
+	-- wizard collision
+	for wiz in all(wizards) do
+		hit = check_rec_col(spell.x,spell.y,4,wiz.x,wiz.y,8)
+		
+		if (hit) then
+			wiz.just_died = true
+			wiz.dx = spell.dx*0.1
 			del(spells,spell)
 		end -- end if
-		-- particles
-		spawn_particles(2,"fire_trail",spell.x,spell.y+4)
-		-- wizard collision
-		for wiz in all(wizards) do
-			hit = check_rec_col(spell.x,spell.y,4,wiz.x,wiz.y,8)
-			
-			if (hit) then
-				wiz.just_died = true
-				wiz.dx = spell.dx*0.1
-				del(spells,spell)
-			end -- end if
-		end
+	end
+	-- wrap around screen
+	-- wrap around screen
+	if spell.x+4 < 0 then
+		spell.x=127
+	end
+	if spell.x > 128 then
+		spell.x=0-4
+	end
 end
 
 function update_particle(p)
