@@ -4,7 +4,6 @@ __lua__
 
 -- TODO fix jumping
 -- TODO timed wizard spawning
--- TODO point counter
 -- TODO start/retry screens
 
 -- init
@@ -85,14 +84,14 @@ function particle(kind,_x,_y)
 		col=14
 		if (rnd(2) > 1) col=2
 		k = {
-			dx=-4+rnd(8),
-			dy=-4+rnd(8),
+			dx=-1+rnd(2),
+			dy=1+rnd(4),
 			col=col, --random orange or yellow
 			ttl=20+rnd(25),
-			grav=0,
+			grav=0.1,
 			col2=5+rnd(2),
 			col2_timer=nil,
-			friction=0.95
+			friction=0.99-rnd(0.2)
 		}
 	end
 	-- use k as preset
