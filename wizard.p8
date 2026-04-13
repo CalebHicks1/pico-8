@@ -19,6 +19,7 @@ end
 
 function wizard(_x,_y,_player)
 	-- create a new player object
+	colors = {2,3,8,9,10,11,12,13,14}
 	a = {
 		x=_x,
 		y=_y,
@@ -33,7 +34,7 @@ function wizard(_x,_y,_player)
   		facing=true, -- true = left
   		dead=false,
 		just_died=false,
-		col=1+rnd(14)
+		col=rnd(colors)
 	}
 	return a
 end
@@ -64,10 +65,10 @@ function particle(kind,_x,_y)
 		k = {
 			dx=-0.2+rnd(0.4),
 			dy=-0.8+rnd(1),
-			col=9+rnd(2), --random orange or yellow
+			col=rnd({9,10}), --random orange or yellow
 			ttl=100+rnd(25),
 			grav=0.04,
-			col2=5+rnd(2),
+			col2=rnd({5,6,7}),
 			col2_timer=20+rnd(20),
 			friction=0.95
 		}
@@ -75,20 +76,18 @@ function particle(kind,_x,_y)
 		k = {
 			dx=-1+rnd(2),
 			dy=-1+rnd(1.5),
-			col=9+rnd(2), --random orange or yellow
+			col=rnd({9,10}), --random orange or yellow
 			ttl=20+rnd(25),
 			grav=-0.3,
-			col2=5+rnd(2),
+			col2=rnd({5,6}),
 			col2_timer=15,
 			friction=0.9-rnd(0.9)
 	}
 	elseif kind=="teleport" then
-		col=14
-		if (rnd(2) > 1) col=2
 		k = {
 			dx=-1+rnd(2),
 			dy=2+rnd(2),
-			col=col, --random orange or yellow
+			col=rnd({2,14}), --random orange or yellow
 			ttl=20+rnd(25),
 			grav=0.4,
 			col2=5+rnd(2),
@@ -180,7 +179,7 @@ function update_wizard(p)
 	accel = 0.3
 	grav = 0.5
 	-- player controls
-	if p.player then
+	if p.player and not p.just_died then
 		if (btn(0)) p.dx -= accel 
 		if (btn(1)) p.dx += accel
 		if (btnp(4)) p.dy = -4
@@ -364,15 +363,9 @@ end
 
 function spr_recolor(n,x,y,flip_x,col,new_col)
 	-- calls the spr() function, replacing a given color with a new one
+	pal(col,new_col)
 	spr(n,x,y,1,1,flip_x)
-	for i=0,8 do
-		for j=0,8 do
-			c = pget(x+i,y+j)
-			if c == col then
-				pset(x+i,y+j,new_col)
-			end
-		end
-	end
+	pal(col,col)
 end
 
 function check_col(x,y,dx,dy)
