@@ -32,7 +32,8 @@ function wizard(_x,_y,_player)
   		player=_player,
   		facing=true, -- true = left
   		dead=false,
-		just_died=false
+		just_died=false,
+		col=1+rnd(14)
 	}
 	return a
 end
@@ -319,8 +320,8 @@ function draw_player(p)
 				spr(50+p.frame,p.x,p.y,1,1,p.facing)
 				-- spr(17+p.frame,p.x,p.y+8,1,1,p.facing)
 			else
-				spr_recolor(1+p.frame, p.x,p.y,p.facing,12,8)
-				spr_recolor(17+p.frame, p.x,p.y+8,p.facing,12,8)
+				spr_recolor(1+p.frame, p.x,p.y,p.facing,12,p.col)
+				spr_recolor(17+p.frame, p.x,p.y+8,p.facing,12,p.col)
 			end
 		else
 			-- draw head and feet
@@ -329,8 +330,8 @@ function draw_player(p)
 				spr(49, p.x,p.y,1,1,p.facing)
 				-- spr(17, p.x,p.y+8,1,1,p.facing)
 			else
-				spr_recolor(1, p.x,p.y,p.facing,12,8)
-				spr_recolor(17, p.x,p.y+8,p.facing,12,8)
+				spr_recolor(1, p.x,p.y,p.facing,12,p.col)
+				spr_recolor(17, p.x,p.y+8,p.facing,12,p.col)
 			end
 		end -- end if
 	else
