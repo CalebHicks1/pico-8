@@ -7,13 +7,20 @@ __lua__
 
 -- init
 function _init()
-	player = wizard(50,20,true)
+    state = "start_screen"
+end
+
+function init_game()
+	player = wizard(35,50,true)
 	player.h=7
+    player.facing = false
 	spells = {}
 	particles = {}
 	wizards = {}
 	add(wizards, player)
 	score = 0
+    state = "play"
+    timers = {}
 end
 
 function wizard(_x,_y,_player)
@@ -104,6 +111,16 @@ end
 -->8
 -- update
 function _update()
+    if state=="start_screen" or state=="end_screen" then
+        if btnp(4) or btnp(5) then
+            init_game()
+        end
+    elseif state=="play" then
+        update_game()
+    end
+end
+
+function update_game()
 	for wiz in all(wizards) do
 		update_wizard(wiz)
 	end
@@ -132,6 +149,8 @@ function wizard_death(w)
 	w.k=23
 	if not w.player then
 		score+=1
+    else
+        state="end_screen" -- game over if player died
 	end
 end
 
@@ -173,6 +192,9 @@ function update_wizard(p)
 		p.dead = true
 		p.burning=35	
 		p.dying=15
+        if p.player then
+            p.dying=25
+        end
 	end -- end if
 	if clock_finished(p, "dying") then
 		wizard_death(p)
@@ -289,6 +311,35 @@ end
 -->8
 -- draw
 function _draw()
+    if state=="play" then
+        draw_game()
+    elseif state=="start_screen" then
+        cls()
+        draw_start_screen()
+    elseif state=="end_screen" then
+        draw_end_screen()
+    end
+end
+
+function draw_start_screen()
+    spr(48, 35, 50, 1, 1, false)
+    -- wizard
+    spr(3, 80, 50, 1, 1, true)
+    spr(18, 80, 58, 1, 1, true)
+    -- fireball
+    spr(33, 55, 55, 1, 1, true)
+    spr(32, 63, 55, 1, 1, true)
+    spr(32, 70, 55, 1, 1, true)
+    print("homunculus run", 35,68,7)
+    print("press 🅾️/❎", 41, 75, 13)
+end
+
+function draw_end_screen()
+    print("retry?", 50,48,7)
+    print("press 🅾️/❎", 41, 55, 13)
+end
+
+function draw_game()
 	cls(0)
 	--fillp(▒)
 	--rectfill(0,0,128,128,1)
@@ -380,7 +431,6 @@ function check_col(x,y,dx,dy)
 	y1 = (y+dy)/8
 	x1 = flr(x/8)
 	wall = mget(x1,y1)
-	print(wall,10,10)
 	if (wall != 0) return true 
 	return false 
 end
@@ -441,9 +491,9 @@ __gfx__
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000dd00dd000000000bbbbbb00b000bbbbbbb2020b
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000dddddddd000000003bb3bbb0b333b333333b2033
 0000000090909990000099900000000000000000000000000000000000000000000000000000000000000000dd6666dd0000000033333b3333333333023b0233
-0000000009099989009998990000000000000000000000000000000000000000000000000000000000000000d522726d000000005335333035553533203b2033
-0000000000999889090989890000000000000000000000000000000000000000000000000000000000000000d522276d00000000555d530055555555023b0233
-0000000090009990000099900000000000000000000000000000000000000000000000000000000000000000d52222dd000000005d5550005d55d55520332033
+000090a009099989009998990000000000000000000000000000000000000000000000000000000000000000d522726d000000005335333035553533203b2033
+0090090000999889090989890000000000000000000000000000000000000000000000000000000000000000d522276d00000000555d530055555555023b0233
+000a000900009990000099900000000000000000000000000000000000000000000000000000000000000000d52222dd000000005d5550005d55d55520332033
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000dd522ddd00000000550000005555555502333333
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000dddddddd000000000000000055d55ddd20233330
 0b00b0b00b00b0b00000b0b00b000000000000000000000000000000000000000000000005050505555555555d5d5d5d00000000000550000000000000000000
