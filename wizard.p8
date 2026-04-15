@@ -20,7 +20,7 @@ function init_game()
 	add(wizards, player)
 	score = 0
     state = "play"
-    timers = {}
+    spawn_timer=nil
 end
 
 function wizard(_x,_y,_player)
@@ -131,12 +131,24 @@ function update_game()
 		update_particle(particle)
 	end --end for
 	-- new wizard
-	if btnp(5) then
+    spawn_wizard()
+end
+
+function spawn_wizard()
+    if spawn_timer == nil then
+        spawn_timer=30
+    end
+    if spawn_timer == 0 then
+        -- add wizard
 		xpos = 5+rnd(118)
 		new_wiz = wizard(xpos,50,false)
 		add(wizards,new_wiz)
 		spawn_particles(100,"teleport",xpos+4,58)
-	end -- end if
+        -- restart timer
+        spawn_timer=60
+    else
+        spawn_timer-=1
+    end
 end
 
 function wizard_death(w)
@@ -210,7 +222,7 @@ function update_wizard(p)
 	if p.player and not p.just_died then
 		if (btn(0)) p.dx -= accel 
 		if (btn(1)) p.dx += accel
-		if (btn(4)) and p.on_ground p.dy = -4
+		if (btn(4) or btn(5)) and p.on_ground p.dy = -4
 			-- cast fireball
 	else
 		enemy_wizard(p)
