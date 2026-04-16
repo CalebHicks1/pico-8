@@ -13,20 +13,20 @@ end
 function init_game()
 	player = wizard(35,50,true)
 	player.h=7
-    player.facing = false
+	player.facing = false
 	spells = {}
 	particles = {}
 	wizards = {}
 	add(wizards, player)
 	score = 0
-    state = "play"
-    spawn_timer=nil
+	state = "play"
+	spawn_timer=nil
 end
 
 function wizard(_x,_y,_player)
 	-- create a new player object
 	colors = {2,3,8,9,10,11,12,13,14}
-	a = {
+	local a = {
 		x=_x,
 		y=_y,
 		k=1,
@@ -35,13 +35,14 @@ function wizard(_x,_y,_player)
 		dx=0,
 		dy=0,
 		frame=1,
-  		cooldown=30,
-  		player=_player,
-  		facing=true, -- true = left
-  		dead=false,
+		cooldown=30,
+		player=_player,
+		facing=true, -- true = left
+		dead=false,
 		just_died=false,
 		col=rnd(colors),
-        on_ground = false
+		on_ground = false,
+		size=1
 	}
 	return a
 end
@@ -159,10 +160,11 @@ function wizard_death(w)
 	w.h = 4
 	w.dying=nil -- delete the clock so this doesn't run again
 	w.k=23
+	w.despawn = 60
 	if not w.player then
 		score+=1
-    else
-        state="end_screen" -- game over if player died
+	else
+		state="end_screen" -- game over if player died
 	end
 end
 
@@ -204,15 +206,34 @@ function update_wizard(p)
 		p.dead = true
 		p.burning=35	
 		p.dying=15
-        if p.player then
-            p.dying=25
-        end
+		if p.player then
+		    p.dying=25
+		end
 	end -- end if
 	if clock_finished(p, "dying") then
 		wizard_death(p)
 	end
 	if check_status(p, "burning") then
 		spawn_particles(p.burning/2, "fire", p.x+p.w/2,p.y+p.h)
+	end
+	-- todo: add timer to sit for a minute before sinking
+	if p.dead then
+		-- should be a skull
+		if p.despawn != nil then
+			if p.despawn > 0 then
+				p.despawn -= 1
+			else
+				p.y+=1
+				p.x+=0.1
+				p.size-=0.05
+				if p.size <= 0 then
+					del(wizards,p)
+				end
+				return
+			end
+		end
+
+		--return -- don't do anything else if dead
 	end
 	-- countdown to prevent spamming spell
 	if (p.cooldown > 0) p.cooldown-=1
@@ -403,7 +424,7 @@ function draw_player(p)
 	else
 		-- dead
 		-- without hat
-		spr(p.k, p.x,p.y,1,1,p.facing)
+		spr(p.k, p.x,p.y,p.size,p.size,p.facing)
 		-- with hat
 		-- spr(6, p.x,p.y,1,1,p.facing)
 		-- spr(22, p.x,p.y+8,1,1,p.facing)
@@ -475,9 +496,9 @@ function clock_finished(obj, clock, skip_decrement)
 	-- checks if the given clock has finished counting down.
     if (obj[clock] == nil) return false 
 	if obj[clock] > 0 then
-        if not skip_decrement then
-            obj[clock] -= 1
-        end
+		if not skip_decrement then
+		    obj[clock] -= 1
+		end
 		return false
 	end
 	obj[clock]=nil
