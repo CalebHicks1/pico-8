@@ -141,10 +141,15 @@ function spawn_wizard()
     end
     if spawn_timer == 0 then
         -- add wizard
+		if #wizards > 3 then
+			-- limit number of wizards that can spawn at once
+			goto skipspawn
+		end
 		xpos = 5+rnd(118)
 		new_wiz = wizard(xpos,50,false)
 		add(wizards,new_wiz)
 		spawn_particles(100,"teleport",xpos+4,58)
+		::skipspawn::
         -- restart timer
         spawn_timer=60
     else
@@ -192,12 +197,29 @@ function enemy_wizard(w)
 	end
 	-- randomly cast fireball
 	if rnd(100) > 98 and w.cooldown==0 then
-	    -- cast_fireball(w)
-        w.casting = 10
+		-- cast_fireball(w)
+		-- don't cast if there's another wizard between this and the player
+		for wiz in all(wizards) do
+			if wiz.dead then
+				-- skip dead wizards
+				goto nextwiz
+			end
+			-- facing left?
+			if w.facing and w.x > wiz.x and wiz.x > player.x then
+				goto dontcast
+			end
+			if (not w.facing) and w.x < wiz.x and wiz.x < player.x then
+				goto dontcast
+			end
+			::nextwiz::
+		end
+		-- no wizards between, so can cast fireball
+		w.casting = 10
+		::dontcast::
 	end
-    if clock_finished(w,"casting",true) then
-        cast_fireball(w)
-    end
+	if clock_finished(w,"casting",true) then
+		cast_fireball(w)
+	end
 end
 
 function update_wizard(p)
@@ -244,7 +266,6 @@ function update_wizard(p)
 		if (btn(0)) p.dx -= accel 
 		if (btn(1)) p.dx += accel
 		if (btn(4) or btn(5)) and p.on_ground p.dy = -4
-			-- cast fireball
 	else
 		enemy_wizard(p)
 	end
