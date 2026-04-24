@@ -171,7 +171,8 @@ function generate_ground()
 		-- width between 0 and 7
 		pen.width = mid(3, pen.width, 7)
 		pen.slope += -0.2 + rnd(0.4)
-		pen.slope = mid(-1, pen.slope, 1)
+		slope_change=0.3
+		pen.slope = mid(-slope_change, pen.slope, slope_change)
 		-- if btn(2) then
 		-- 	pen.slope -= 0.1
 		-- end
