@@ -60,10 +60,12 @@ function update_player(p)
 
 	-- what is the slope at point of collision?
 	slope_dx = 2 * p.collider.r
-	slope_dy = -1*(ground[flr(p.collider.x - p.collider.r)].y - ground[flr(p.collider.x + p.collider.r)].y)
+	slope_dy = -1 * (ground[flr(p.collider.x - p.collider.r)].y - ground[flr(p.collider.x + p.collider.r)].y)
 	slope =slope_dy / slope_dx
 	slope_vec = vec(slope_dx, slope_dy)
 	slope_norm = normalize_vec(slope_vec)
+	-- what is the angle of the slope?
+	slope_angle = atan2(slope_dx,slope_dy)
 end
 
 function update_ball(b)
@@ -135,12 +137,14 @@ function draw_ball(b)
 end
 
 function draw_player(p)
-	spr(p.k,p.x,p.y)
-	debug = true
+	-- spr(p.k,p.x,p.y)
+	rot_spr(p.k,p.x,p.y,slope_angle)
+	debug = false
 	if debug then
 		-- draw debug lines
 		circ(p.collider.x,p.collider.y,p.collider.r,8)
 		line(p.collider.x,p.collider.y, p.collider.x+slope_norm.x*6,p.collider.y+slope_norm.y*6,12)
+		print(slope_angle,10,10,12)
 	end
 end
 -- constructors
@@ -188,6 +192,35 @@ function new_ground(_y, _h)
 end
 
 -- util
+function rot_spr(k, x, y, a)
+	-- draw the given sprite rotated by a
+	-- note: only works for sprites on first row of sheet
+	spritesheet_x = k*8
+	spritesheet_y = 0
+	-- center of sprite
+	c = vec(x+4.5,y+4.5)
+	for i=0,8 do
+		for j=0,8 do
+			col = sget(spritesheet_x+i,spritesheet_y+j)
+			if col != 0 then
+				p = vec(x+i,y+j)
+				p_rot = rot(p,a,c)
+				pset(p_rot.x,p_rot.y,col)
+			end
+			-- get world x, y
+			-- rotate around point
+			-- get color from sprite sheet
+		end
+	end
+end
+
+function rot(p,a,c)
+	-- return the given point rotated around c by a
+	p_rot = p
+	p_rot.x = (p.x-c.x)*cos(a)-(p.y-c.y)*sin(a) + c.x
+	p_rot.y = (p.y-c.y)*cos(a)+(p.x-c.x)*sin(a) + c.y
+	return p_rot
+end
 
 function touching_ground(p)
 	-- given a player, tell if it will intersect the ground in the next frame
