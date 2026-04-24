@@ -20,6 +20,8 @@ function init_game()
 	dy = 0
 	m_perp = vec()
 	ground_force = vec()
+
+	player = new_player(64,30)
 end
 
 function _update()
@@ -40,6 +42,28 @@ function _update()
 		rand_seed += 1
 		init_game()
 	end
+	update_player(player)
+end
+
+function update_player(p)
+	player_grav = 30
+	p.dy+=player_grav*dt
+	--if touching_ground(p) then
+	--	p.dy = 0
+	--end
+	touching_ground(p)
+	p.y+=p.dy*dt
+	-- move hitbox with player
+	p.mid = vec(p.x+4.5,p.y+4.5)
+	p.collider.x = p.mid.x
+	p.collider.y = p.mid.y+2
+
+	-- what is the slope at point of collision?
+	slope_dx = 2 * p.collider.r
+	slope_dy = -1*(ground[flr(p.collider.x - p.collider.r)].y - ground[flr(p.collider.x + p.collider.r)].y)
+	slope =slope_dy / slope_dx
+	slope_vec = vec(slope_dx, slope_dy)
+	slope_norm = normalize_vec(slope_vec)
 end
 
 function update_ball(b)
@@ -83,7 +107,7 @@ function _draw()
 	cls()
 	camera(camera_x, 0)
 	draw_ground(camera_x)
-	-- debug lines
+	draw_player(player)
 	-- draw the slope
 	camera()
 end
@@ -110,25 +134,47 @@ function draw_ball(b)
 	circ(b.pos.x, b.pos.y, b.r, 8)
 end
 
+function draw_player(p)
+	spr(p.k,p.x,p.y)
+	debug = true
+	if debug then
+		-- draw debug lines
+		circ(p.collider.x,p.collider.y,p.collider.r,8)
+		line(p.collider.x,p.collider.y, p.collider.x+slope_norm.x*6,p.collider.y+slope_norm.y*6,12)
+	end
+end
 -- constructors
+function new_player(_x,_y)
+	p = {
+		x=_x,
+		y=_y,
+		dx=0,
+		dy=0,
+		angle=0,
+		k=1 -- sprite
+
+	}
+	p.collider = new_ground_collider()
+	return p
+end
+
 function new_pen()
 	p = {
 		x = 0,
 		dx = 1,
 		y = 64,
+		r = 3,
 		slope = 0.1,
 		width = 5,
 	}
 	return p
 end
 
-function new_ball()
+function new_ground_collider()
 	b = {
-		pos = vec(64, 10),
-		vel = vec(),
-		m = 2,
-		r = 5,
-		forces = {},
+		x=0,
+		y=0,
+		r = 3,
 	}
 	return b
 end
@@ -142,6 +188,18 @@ function new_ground(_y, _h)
 end
 
 -- util
+
+function touching_ground(p)
+	-- given a player, tell if it will intersect the ground in the next frame
+	-- if so, reduce the change in position so the collision won't happen
+	ground_height = ground[flr(p.collider.x)].y
+	distance_past_ground = p.collider.y + p.dy*dt - ground_height
+	if distance_past_ground > 0 then
+		p.dy-=distance_past_ground/dt
+		return true
+	end
+	return false
+end
 
 function vec(_x, _y)
 	-- default to 0
