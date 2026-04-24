@@ -46,11 +46,24 @@ function _update()
 end
 
 function update_player(p)
+	-- x movement
+	accel = 90
+	speed = 100
+	if btn(1) then
+		p.dx += accel * dt
+	end
+	if btn(0) then
+		p.dx -= accel * dt
+	end
+	-- friction
+	p.dx *= 0.85
+	-- max speed
+	p.dx = mid(-speed,p.dx,speed)
+	p.x += p.dx * dt
+	-- y movement
 	player_grav = 30
 	p.dy+=player_grav*dt
-	--if touching_ground(p) then
-	--	p.dy = 0
-	--end
+	-- ground collision
 	touching_ground(p)
 	p.y+=p.dy*dt
 	-- move hitbox with player
