@@ -43,6 +43,16 @@ function _update()
 		init_game()
 	end
 	update_player(player)
+	-- camera follows player
+	-- convert player coords to screen coords
+	px = player.x - camera_x
+	margin = 40
+	if px > 128-margin then 
+		camera_x += 1
+	end
+	if px < margin then 
+		camera_x -= 1
+	end
 end
 
 function update_player(p)
@@ -56,7 +66,7 @@ function update_player(p)
 		p.dx -= accel * dt
 	end
 	-- friction
-	p.dx *= 0.85
+	p.dx *= 0.87
 	-- max speed
 	p.dx = mid(-speed,p.dx,speed)
 	p.x += p.dx * dt
@@ -266,7 +276,7 @@ function normalize_vec(v)
 end
 
 function generate_ground()
-	for i = 0, 128 do
+	for i = 0, 1024 do
 		dirt_len = pen.width
 		ground[pen.x] = new_ground(pen.y, dirt_len)
 		pen.x += pen.dx
@@ -277,6 +287,10 @@ function generate_ground()
 		pen.slope += -0.2 + rnd(0.4)
 		slope_change=0.3
 		pen.slope = mid(-slope_change, pen.slope, slope_change)
+		if i < 100 then
+			-- start out flat
+			pen.slope=0
+		end
 		-- if btn(2) then
 		-- 	pen.slope -= 0.1
 		-- end
