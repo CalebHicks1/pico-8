@@ -21,7 +21,7 @@ function init_game()
 	pen = new_pen()
 	ground = {}
 	camera_x = 0
-
+	clock = 0
 	generate_ground()
 	dt = 1 / 30
 	-- add grav to ball
@@ -39,7 +39,7 @@ end
 
 function _update()
 	dt = 1 / 30
-
+	clock = (clock + 1) % 1000
 	-- slow motion
 	if btn(4) then
 		dt = 1 / 120
@@ -62,6 +62,14 @@ function _update()
 end
 
 function update_player(p)
+	-- pick sprite
+	if clock%30 == 0 then
+		if p.k == 1 then
+			p.k = 2
+		else
+			p.k = 1
+		end
+	end
 	-- x movement
 	accel = 90
 	speed = 100
@@ -144,6 +152,9 @@ function _draw()
 end
 
 function draw_ground(start_x)
+	transition_start = 90
+	transition_end = 100
+	transition_to_type=2
 	for x = max(0, start_x), start_x + 128 do
 		if ground[x] == nil then
 			break
@@ -158,6 +169,12 @@ function draw_ground(start_x)
 		fillp(▒)
 		rectfill(x, ground[x].y + 30, x, ground[x].y + 100, 0)
 		fillp()
+
+		if x >= transition_start and x <= transition_end then
+			fillp(▒)
+			rectfill(x, ground[x].y, x, ground[x].y + ground[x].h, ground_types[transition_to_type].top_layer)
+			fillp()
+		end
 	end
 end
 
@@ -229,8 +246,8 @@ function rot_spr(k, x, y, a)
 	spritesheet_y = 0
 	-- center of sprite
 	c = vec(x+4.5,y+4.5)
-	for i=0,8 do
-		for j=0,8 do
+	for i=0,7 do
+		for j=0,7 do
 			col = sget(spritesheet_x+i,spritesheet_y+j)
 			if col != 0 then
 				p = vec(x+i,y+j)
