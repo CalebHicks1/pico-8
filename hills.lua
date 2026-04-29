@@ -1,5 +1,17 @@
 function _init()
 	rand_seed = 4
+	ground_types = {
+		{
+			name="mars",
+			top_layer=9,
+			bottom_layer=4
+		},
+		{
+			name="grass",
+			top_layer=3,
+			bottom_layer=4
+		}
+	}
 	init_game()
 end
 
@@ -20,19 +32,13 @@ function init_game()
 	dy = 0
 	m_perp = vec()
 	ground_force = vec()
-
-	player = new_player(64,30)
+	
+	-- start player on ground
+	player = new_player(64,ground[64].y-7)
 end
 
 function _update()
 	dt = 1 / 30
-	-- camera controls
-	-- if btn(4) then
-	-- 	camera_x -= 1
-	-- end
-	-- if btn(5) then
-	-- 	camera_x += 1
-	-- end
 
 	-- slow motion
 	if btn(4) then
@@ -143,14 +149,14 @@ function draw_ground(start_x)
 			break
 		end
 		-- dirt length
-		line(x, ground[x].y, x, 128, 4)
+		line(x, ground[x].y, x, 128, ground_types[ground[x].type].bottom_layer)
 		-- top part of ground
-		line(x, ground[x].y, x, ground[x].y + ground[x].h, 9)
+		line(x, ground[x].y, x, ground[x].y + ground[x].h, ground_types[ground[x].type].top_layer)
 		-- fade out
 		fillp(░)
-		rectfill(x, ground[x].y + 20, x, ground[x].y + 39, 0)
+		rectfill(x, ground[x].y + 15, x, ground[x].y + 29, 0)
 		fillp(▒)
-		rectfill(x, ground[x].y + 40, x, ground[x].y + 100, 0)
+		rectfill(x, ground[x].y + 30, x, ground[x].y + 100, 0)
 		fillp()
 	end
 end
@@ -206,10 +212,11 @@ function new_ground_collider()
 	return b
 end
 
-function new_ground(_y, _h)
+function new_ground(_y, _h, _type)
 	g = {
 		y = _y,
 		h = _h,
+		type = _type
 	}
 	return g
 end
@@ -278,7 +285,12 @@ end
 function generate_ground()
 	for i = 0, 1024 do
 		dirt_len = pen.width
-		ground[pen.x] = new_ground(pen.y, dirt_len)
+		-- change to grass after 200
+		ground_type = 1
+		if i > 100 then
+			ground_type = 2
+		end
+		ground[pen.x] = new_ground(pen.y, dirt_len, ground_type)
 		pen.x += pen.dx
 		pen.y += pen.slope * pen.dx
 		pen.width += rnd({ -0.4, 0.4 })
